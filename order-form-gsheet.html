@@ -119,6 +119,15 @@
     <h2>目前訂購清單</h2>
     <div id="list-content"><p class="empty-note">載入中...</p></div>
   </div>
+
+  <div class="list-section">
+    <h2>查詢／取消我的訂單</h2>
+    <div style="display:flex; gap:8px;">
+      <input type="text" id="query-name" placeholder="輸入你訂購時填的姓名" style="flex:1; padding:8px 10px; border:1px solid #ccc; border-radius:6px; font-size:14px;">
+      <button onclick="queryMyOrders()" style="background:#8a4a2f; color:white; border:none; padding:8px 20px; border-radius:8px; font-size:14px; cursor:pointer; white-space:nowrap;">查詢</button>
+    </div>
+    <div id="query-result" style="margin-top:12px;"></div>
+  </div>
 </div>
 
 <script>
@@ -251,6 +260,62 @@ async function submitOrder() {
     msgEl.textContent = '送出失敗，請再試一次。';
   } finally {
     btn.disabled = false;
+  }
+}
+
+async function queryMyOrders() {
+  const name = document.getElementById('query-name').value.trim();
+  const resultEl = document.getElementById('query-result');
+  if (!name) {
+    resultEl.innerHTML = '<p class="empty-note">請輸入姓名</p>';
+    return;
+  }
+  resultEl.innerHTML = '<p class="empty-note">查詢中...</p>';
+  try {
+    const res = await fetch(WEBAPP_URL + '?action=query&name=' + encodeURIComponent(name));
+    const orders = await res.json();
+    if (!orders || orders.length === 0) {
+      resultEl.innerHTML = '<p class="empty-note">查無此姓名的訂單。</p>';
+      return;
+    }
+    let html = '';
+    orders.forEach(o => {
+      let total = 0;
+      const itemsText = o.items.map(it => {
+        total += it.qty * it.price;
+        return `${it.item} x${it.qty}`;
+      }).join('、');
+      const safeName = o.name.replace(/'/g, "\\'");
+      html += `<div style="border:1px solid #e0dcd0; border-radius:8px; padding:10px 14px; margin-top:10px;">
+        <div style="font-size:13.5px;">${itemsText}</div>
+        <div style="color:#888; font-size:12px; margin-top:4px;">小計 $${total}</div>
+        <button onclick="cancelMyOrder('${o.orderId}', '${safeName}')" style="margin-top:8px; background:#c0392b; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:12px; cursor:pointer;">取消此筆訂單</button>
+      </div>`;
+    });
+    resultEl.innerHTML = html;
+  } catch (e) {
+    resultEl.innerHTML = '<p class="empty-note">查詢失敗，請再試一次。</p>';
+  }
+}
+
+async function cancelMyOrder(orderId, name) {
+  if (!confirm('確定要取消這筆訂單嗎？此動作無法復原。')) return;
+  try {
+    const res = await fetch(WEBAPP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'cancel', orderId, name })
+    });
+    const result = await res.json();
+    if (result && result.success) {
+      alert('已取消這筆訂單。');
+      queryMyOrders();
+      loadOrders();
+    } else {
+      alert('取消失敗，請再試一次。');
+    }
+  } catch (e) {
+    alert('取消失敗，請再試一次。');
   }
 }
 </script>
