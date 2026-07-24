@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>御梅園 優質果乾 - 同事訂購單</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
+    background: #f7f5f0;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+  }
+  .container { max-width: 900px; margin: 0 auto; }
+  header {
+    background: #8a4a2f;
+    color: white;
+    padding: 20px 24px;
+    border-radius: 12px 12px 0 0;
+  }
+  header h1 { margin: 0 0 4px; font-size: 22px; }
+  header p { margin: 0; font-size: 13px; opacity: 0.9; }
+  .info-box {
+    background: white;
+    padding: 16px 24px;
+    border: 1px solid #e0dcd0;
+    border-top: none;
+  }
+  .info-box label { display: block; font-size: 13px; color: #666; margin-bottom: 4px; }
+  .info-box input {
+    width: 100%; padding: 8px 10px; border: 1px solid #ccc; border-radius: 6px;
+    font-size: 14px; margin-bottom: 10px;
+  }
+  .categories {
+    background: white;
+    border: 1px solid #e0dcd0;
+    border-top: none;
+    padding: 8px 24px 20px;
+  }
+  .category { margin-top: 18px; }
+  .category h2 {
+    font-size: 15px;
+    color: #8a4a2f;
+    border-bottom: 2px solid #8a4a2f;
+    padding-bottom: 4px;
+    margin-bottom: 8px;
+  }
+  .item-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 6px 14px;
+  }
+  .item-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 0;
+    border-bottom: 1px dashed #eee;
+    font-size: 13.5px;
+  }
+  .item-row .name { flex: 1; }
+  .item-row .price { color: #999; font-size: 12px; margin-right: 8px; white-space: nowrap; }
+  .item-row input[type="number"] {
+    width: 52px; padding: 4px; border: 1px solid #ccc; border-radius: 6px;
+    text-align: center; font-size: 13px;
+  }
+  .submit-bar {
+    background: white; border: 1px solid #e0dcd0; border-top: none;
+    padding: 16px 24px; border-radius: 0 0 12px 12px;
+  }
+  .submit-bar button {
+    background: #8a4a2f; color: white; border: none; padding: 10px 24px;
+    border-radius: 8px; font-size: 15px; cursor: pointer;
+  }
+  .submit-bar button:hover { background: #723c25; }
+  .submit-bar button:disabled { background: #ccc; cursor: not-allowed; }
+  .msg { font-size: 13px; margin-top: 8px; }
+  .msg.error { color: #c0392b; }
+  .msg.ok { color: #1a7a3d; }
+
+  .list-section {
+    margin-top: 24px;
+    background: white;
+    border: 1px solid #e0dcd0;
+    border-radius: 12px;
+    padding: 16px 24px 20px;
+  }
+  .list-section h2 { font-size: 17px; color: #8a4a2f; margin-top: 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin-top: 8px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #eee; }
+  th { color: #666; font-weight: 500; }
+  .order-name { font-weight: bold; color: #8a4a2f; }
+  .total-row td { font-weight: bold; border-top: 2px solid #8a4a2f; }
+  .empty-note { color: #999; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>御梅園 優質果乾</h1>
+    <p>同事訂購單 - 每包110元(部分除外)，滿2200元享免運宅配</p>
+  </header>
+
+  <div class="info-box">
+    <label>訂購人姓名</label>
+    <input type="text" id="orderer-name" placeholder="請輸入姓名">
+  </div>
+
+  <div class="categories" id="categories"></div>
+
+  <div class="submit-bar">
+    <button id="submit-btn" onclick="submitOrder()">送出訂購</button>
+    <div id="msg" class="msg"></div>
+  </div>
+
+  <div class="list-section">
+    <h2>目前訂購清單</h2>
+    <div id="list-content"><p class="empty-note">載入中...</p></div>
+  </div>
+</div>
+
+<script>
+// ↓↓↓ 把你的 Google Apps Script 網頁應用程式網址貼在這裡 ↓↓↓
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxFNkVN9a6GBpMbYtep8I6jlgxe3oaRG-Jp0EVDhBZf32NOE8AE3h0KT6ulkvdU-zzt/exec";
+// ↑↑↑ 記得結尾要是 /exec ↑↑↑
+
+const DATA = {
+  "梅子系列": { price: 110, items: ["甘甜梅","無籽梅","日式梅片","日式梅肉","益生菌梅肉","冰梅","櫻桃梅","化核梅","烏龍茶梅","紫蘇梅","脆梅","消脂梅","甘草梅","烏梅","咖啡梅","梅粉"] },
+  "橄欖系列": { price: 110, items: ["化核橄欖","甘草橄欖簽","原味橄欖","無籽甘草橄欖","辣橄欖","橄欖片"] },
+  "治咳系列": { price: null, items: [
+    {name: "柚仔茶", price: 110},
+    {name: "薄荷金桔", price: 110},
+    {name: "蜂蜜金棗", price: 110},
+    {name: "枇杷喉糖", price: 110},
+    {name: "醋酸檸檬", price: 110},
+    {name: "陳皮梅", price: 110},
+    {name: "黃金桔", price: 110},
+    {name: "金桔餅", price: 110},
+    {name: "陳皮", price: 110}
+  ]},
+  "水果系列": { price: 110, items: ["芭樂乾","愛文芒果乾","黃金水蜜桃","金綻百香梅片","草莓果粒梅片","胭脂芭樂梅片","金旺萊梅片","台灣百香果乾","雲林鮮橙果片","黃金檸檬","全果粒蔓越莓","芒果乾","鳳梨乾","番茄乾","鹹葡萄乾","無籽脆桃","香橙水蜜桃"] },
+  "綜合系列": { price: 110, items: ["相思果","洛神花","小紅莓","蒟蒻乾","辣芒果乾","無花果(木瓜絲)","辣豆干","沙茶豆干","香川豆干條","黑糖Q棗","化應子","大仙李","情人果","仙楂片","小丸子","梅花餅","山楂油切果"] }
+};
+
+function buildForm() {
+  const container = document.getElementById('categories');
+  Object.keys(DATA).forEach(cat => {
+    const catDiv = document.createElement('div');
+    catDiv.className = 'category';
+    const h2 = document.createElement('h2');
+    h2.textContent = cat;
+    catDiv.appendChild(h2);
+    const grid = document.createElement('div');
+    grid.className = 'item-grid';
+
+    DATA[cat].items.forEach(entry => {
+      const name = typeof entry === 'string' ? entry : entry.name;
+      const price = typeof entry === 'string' ? DATA[cat].price : entry.price;
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      row.innerHTML = `
+        <span class="name">${name}</span>
+        <span class="price">$${price}</span>
+        <input type="number" min="0" value="0" data-item="${name}" data-price="${price}" data-cat="${cat}">
+      `;
+      grid.appendChild(row);
+    });
+    catDiv.appendChild(grid);
+    container.appendChild(catDiv);
+  });
+}
+buildForm();
+
+async function loadOrders() {
+  const listEl = document.getElementById('list-content');
+  try {
+    const res = await fetch(WEBAPP_URL);
+    const orders = await res.json();
+
+    if (!orders || orders.length === 0) {
+      listEl.innerHTML = '<p class="empty-note">目前尚無人訂購。</p>';
+      return;
+    }
+
+    let grandTotal = 0;
+    let html = '<table><thead><tr><th>訂購人</th><th>品項</th><th>數量</th><th>小計</th></tr></thead><tbody>';
+    orders.forEach(o => {
+      let orderTotal = 0;
+      o.items.forEach((it, idx) => {
+        orderTotal += it.qty * it.price;
+        html += `<tr>
+          <td>${idx === 0 ? '<span class="order-name">' + o.name + '</span>' : ''}</td>
+          <td>${it.item}</td>
+          <td>${it.qty}</td>
+          <td>$${it.qty * it.price}</td>
+        </tr>`;
+      });
+      grandTotal += orderTotal;
+      html += `<tr><td></td><td colspan="2" style="text-align:right; color:#888;">此人小計</td><td>$${orderTotal}</td></tr>`;
+    });
+    html += `<tr class="total-row"><td colspan="3">全部合計</td><td>$${grandTotal}</td></tr>`;
+    html += '</tbody></table>';
+    listEl.innerHTML = html;
+  } catch (e) {
+    listEl.innerHTML = '<p class="empty-note">清單載入失敗，請重新整理頁面。</p>';
+  }
+}
+loadOrders();
+
+async function submitOrder() {
+  const msgEl = document.getElementById('msg');
+  const name = document.getElementById('orderer-name').value.trim();
+  if (!name) {
+    msgEl.className = 'msg error';
+    msgEl.textContent = '請輸入訂購人姓名';
+    return;
+  }
+  const inputs = document.querySelectorAll('#categories input[type="number"]');
+  const items = [];
+  inputs.forEach(inp => {
+    const qty = parseInt(inp.value, 10) || 0;
+    if (qty > 0) {
+      items.push({ item: inp.dataset.item, price: parseInt(inp.dataset.price, 10), qty });
+    }
+  });
+  if (items.length === 0) {
+    msgEl.className = 'msg error';
+    msgEl.textContent = '請至少選擇一項商品的數量';
+    return;
+  }
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  try {
+    const res = await fetch(WEBAPP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ name, items })
+    });
+    const result = await res.json();
+    if (!result || !result.success) throw new Error('儲存失敗');
+    msgEl.className = 'msg ok';
+    msgEl.textContent = '訂購成功！已加入清單。';
+    inputs.forEach(inp => inp.value = 0);
+    document.getElementById('orderer-name').value = '';
+    await loadOrders();
+  } catch (e) {
+    msgEl.className = 'msg error';
+    msgEl.textContent = '送出失敗，請再試一次。';
+  } finally {
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>
