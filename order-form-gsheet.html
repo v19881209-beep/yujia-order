@@ -210,7 +210,7 @@ async function loadOrders() {
         </tr>`;
       });
       grandTotal += orderTotal;
-      html += `<tr><td></td><td colspan="2" style="text-align:right; color:#888;">小計</td><td>$${orderTotal}</td></tr>`;
+      html += `<tr><td></td><td colspan="2" style="text-align:right; color:#888;">此單小計</td><td>$${orderTotal}</td></tr>`;
     });
     html += `<tr class="total-row"><td colspan="3">全部合計</td><td>$${grandTotal}</td></tr>`;
     html += '</tbody></table>';
