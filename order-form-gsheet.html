@@ -197,10 +197,13 @@ async function loadOrders() {
     let html = '<table><thead><tr><th>訂購人</th><th>品項</th><th>數量</th><th>小計</th></tr></thead><tbody>';
     orders.forEach(o => {
       let orderTotal = 0;
+      const paidLabel = o.paid
+        ? `<div style="color:#c0392b; font-weight:bold; font-size:20px; margin-top:2px;">${o.paidDate ? o.paidDate + ' 已付款' : '已付款'}</div>`
+        : '';
       o.items.forEach((it, idx) => {
         orderTotal += it.qty * it.price;
         html += `<tr>
-          <td>${idx === 0 ? '<span class="order-name">' + o.name + '</span>' : ''}</td>
+          <td>${idx === 0 ? '<span class="order-name">' + o.name + '</span>' + paidLabel : ''}</td>
           <td>${it.item}</td>
           <td>${it.qty}</td>
           <td>$${it.qty * it.price}</td>
