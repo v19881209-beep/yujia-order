@@ -151,6 +151,14 @@ const DATA = {
 
 function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
+function fmtDate(v){
+  const n = Number(v);
+  const d = (isFinite(n) && n > 1e11) ? new Date(n) : new Date(v);
+  if (isNaN(d.getTime())) return v;
+  const p = x => String(x).padStart(2,'0');
+  return `${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
 function buildForm() {
   const container = document.getElementById('categories');
   Object.keys(DATA).forEach(cat => {
@@ -248,7 +256,7 @@ async function queryMyOrders() {
       }).join('、');
       const safeName = o.name.replace(/'/g, "\\'");
       html += `<div style="border:1px solid #e0dcd0; border-radius:8px; padding:10px 14px; margin-top:10px;">
-        ${(o.date||o.time||o.timestamp) ? `<div style="color:#888; font-size:21px; margin-bottom:4px;">${esc(o.date||o.time||o.timestamp)}</div>` : ''}${o.paid ? `<div style="color:#c0392b; font-weight:bold; font-size:21px;">${o.paidDate ? esc(o.paidDate)+' ' : ''}已付款</div>` : ''}
+        ${(o.date||o.time||o.timestamp) ? `<div style="color:#888; font-size:21px; margin-bottom:4px;">${esc(fmtDate(o.date||o.time||o.timestamp))}</div>` : ''}${o.paid ? `<div style="color:#c0392b; font-weight:bold; font-size:21px;">${o.paidDate ? esc(o.paidDate)+' ' : ''}已付款</div>` : ''}
         <div style="font-size:24px;">${itemsText}</div>
         <div style="color:#888; font-size:21px; margin-top:4px;">小計 $${total}</div>
         <button onclick="cancelMyOrder('${o.orderId}', '${safeName}')" style="margin-top:8px; background:#c0392b; color:white; border:none; padding:12px 24px; border-radius:8px; font-size:21px; cursor:pointer;">取消此筆訂單</button>
