@@ -103,6 +103,11 @@
     <p>同事訂購單 - 每包110元(部分除外)，滿2200元享免運宅配</p>
   </header>
 
+  <div id="closed-banner" style="display:none; background:#c0392b; color:white; padding:16px 24px; font-size:26px; font-weight:bold; line-height:1.5;">
+    🔒 本次訂購已於 12/5 截單，頁面已鎖定，無法再下單。<br>
+    <span style="font-size:22px; font-weight:normal;">還是可以在下面查詢自己的訂單。付款日期，等郁嘉做好心理準備再通知。</span>
+  </div>
+
   <div class="list-section intro" style="margin-top:0; border-radius:0; border-top:none; background:#fff8ec;">
     <h2 style="font-size:30px;">🎬 御梅園 PART 2，在大家的敲碗聲中回歸！</h2>
     <p style="font-size:24px; line-height:1.7; margin:0;">
@@ -110,6 +115,8 @@
       三個理由湊在一起，就算上帝想攔也攔不住。<br>
       上一集有人吃到停不下來，這一集預計有人<b>邊填單邊流口水</b>。<br>
       要吃就趁現在，過節送禮、辦公室零食、半夜偷吃，一次備齊。🍬<br>
+      💸 <b>先不用付錢</b>，年底闆娘可能缺貨，最後以實際收到的數量為準。<br>
+      付款日期，等郁嘉做好心理準備再通知。<br>
       <span style="color:#8a4a2f;">（郁嘉保證：點進來只有梅子，沒有加班。）</span>
     </p>
   </div>
@@ -197,7 +204,24 @@ function buildForm() {
 }
 buildForm();
 
+// 截單時間：2026/12/05 23:59:59（台灣時間 UTC+8），過了就鎖住不能下單
+const DEADLINE = Date.UTC(2026, 11, 5, 23, 59, 59) - 8 * 3600 * 1000;
+let orderClosed = false;
+function applyLock(now) {
+  orderClosed = (now === undefined ? Date.now() : now) > DEADLINE;
+  if (!orderClosed) return;
+  document.getElementById('closed-banner').style.display = 'block';
+  document.querySelectorAll('#categories input').forEach(i => { i.disabled = true; });
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = '已截單';
+  document.getElementById('orderer-name').placeholder = '輸入姓名即可查詢訂單';
+}
+applyLock();
+
 async function submitOrder() {
+  applyLock();
+  if (orderClosed) return;
   const msgEl = document.getElementById('msg');
   const name = document.getElementById('orderer-name').value.trim();
   if (!name) {
