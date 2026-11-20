@@ -292,7 +292,7 @@ async function queryMyOrders() {
         ${(o.date||o.time||o.timestamp) ? `<div style="color:#888; font-size:21px; margin-bottom:4px;">${esc(fmtDate(o.date||o.time||o.timestamp))}</div>` : ''}${o.paid ? `<div style="color:#c0392b; font-weight:bold; font-size:21px;">${o.paidDate ? esc(o.paidDate)+' ' : ''}已付款</div>` : ''}
         <div style="font-size:24px;">${itemsText}</div>
         <div style="color:#888; font-size:21px; margin-top:4px;">小計 $${total}</div>
-        ${orderClosed ? '<div style="margin-top:8px; color:#888; font-size:21px;">🔒 已截單，無法取消</div>' : `<button onclick="cancelMyOrder('${o.orderId}', '${safeName}')" style="margin-top:8px; background:#c0392b; color:white; border:none; padding:12px 24px; border-radius:8px; font-size:21px; cursor:pointer;">取消此筆訂單</button>`}
+        ${o.paid ? '<div style="margin-top:8px; color:#888; font-size:21px;">✅ 已付款，無法取消</div>' : orderClosed ? '<div style="margin-top:8px; color:#888; font-size:21px;">🔒 已截單，無法取消</div>' : `<button onclick="cancelMyOrder('${o.orderId}', '${safeName}')" style="margin-top:8px; background:#c0392b; color:white; border:none; padding:12px 24px; border-radius:8px; font-size:21px; cursor:pointer;">取消此筆訂單</button>`}
       </div>`;
     });
     resultEl.innerHTML = html;
