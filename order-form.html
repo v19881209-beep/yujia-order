@@ -100,7 +100,7 @@
 <div class="container">
   <header>
     <h1>御梅園 優質果乾</h1>
-    <p>同事訂購單 - 每包110元(部分除外)，滿2200元享免運宅配</p>
+    <p>同事訂購單 - 每包110元，滿2200元享免運宅配</p>
   </header>
 
   <div id="closed-banner" style="display:none; background:#c0392b; color:white; padding:16px 24px; font-size:26px; font-weight:bold; line-height:1.5;">
@@ -115,6 +115,7 @@
       三個理由湊在一起，就算上帝想攔也攔不住。<br>
       上一集有人吃到停不下來，這一集預計有人<b>邊填單邊流口水</b>。<br>
       要吃就趁現在，過節送禮、辦公室零食、半夜偷吃，一次備齊。🍬<br>
+      📦 大家的單會<b>合併一起下單</b>：滿 2,200 元免運，未滿運費 150 元；全部加起來滿 1,100 元才會出貨。<br>
       💸 <b>先不用付錢</b>，年底闆娘可能缺貨，最後以實際收到的數量為準。<br>
       付款日期，等郁嘉做好心理準備再通知。<br>
       <span style="color:#8a4a2f;">（郁嘉保證：點進來只有梅子，沒有加班。）</span>
@@ -148,21 +149,11 @@ const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxFNkVN9a6GBpMbYtep8
 // ↑↑↑ 記得結尾要是 /exec ↑↑↑
 
 const DATA = {
-  "梅子系列": { price: 110, items: ["甘甜梅","無籽梅","日式梅片","日式梅肉","益生菌梅肉","冰梅","櫻桃梅","化核梅","烏龍茶梅","紫蘇梅","脆梅","消脂梅","甘草梅","烏梅","咖啡梅","梅粉"] },
-  "橄欖系列": { price: 110, items: ["化核橄欖","甘草橄欖簽","原味橄欖","無籽甘草橄欖","辣橄欖","橄欖片"] },
-  "治咳系列": { price: null, items: [
-    {name: "柚仔茶", price: 110},
-    {name: "薄荷金桔", price: 110},
-    {name: "蜂蜜金棗", price: 110},
-    {name: "枇杷喉糖", price: 110},
-    {name: "醋酸檸檬", price: 110},
-    {name: "陳皮梅", price: 110},
-    {name: "黃金桔", price: 110},
-    {name: "金桔餅", price: 110},
-    {name: "陳皮", price: 110}
-  ]},
-  "水果系列": { price: 110, items: ["芭樂乾","愛文芒果乾","黃金水蜜桃","金綻百香梅片","草莓果粒梅片","胭脂芭樂梅片","金旺萊梅片","台灣百香果乾","雲林鮮橙果片","黃金檸檬","全果粒蔓越莓","芒果乾","鳳梨乾","番茄乾","鹹葡萄乾","無籽脆桃","香橙水蜜桃"] },
-  "綜合系列": { price: 110, items: ["相思果","洛神花","小紅莓","蒟蒻乾","辣芒果乾","無花果(木瓜絲)","辣豆干","沙茶豆干","香川豆干條","黑糖Q棗","化應子","大仙李","情人果","仙楂片","小丸子","梅花餅","山楂油切果"] }
+  "梅子系列": { price: 110, items: ["甘甜梅","無籽梅","日式梅肉","日式梅片",{name:"梅有芒果",price:110,soldOut:true},"益生菌梅肉","冰梅","金綻百香梅片","草莓顆粒梅片","胭脂芭樂梅片","金旺萊梅片","黃金蜜桃梅片","化核梅","櫻桃梅","烏龍茶梅","紫蘇梅","脆梅","消脂梅","甘草梅","烏梅","咖啡梅"] },
+  "橄欖系列": { price: 110, items: ["化核橄欖","無籽甘草橄欖","甘草橄欖簽","原味橄欖","辣橄欖","橄欖片"] },
+  "治咳系列": { price: 110, items: ["柚仔茶","枇杷喉糖","薄荷金桔","蜂蜜金棗","陳皮","金桔餅","陳皮梅"] },
+  "水果系列": { price: 110, items: ["芭樂乾","愛文芒果乾","黃金水蜜桃","台灣百香果乾","雲林鮮橙果片","芒果乾","無籽脆桃","全果粒蔓越莓","鳳梨乾","辣芒果乾","黃金檸檬","番茄乾","鹹葡萄乾","黑糖Q棗","油切果(山楂)","香橙水蜜桃"] },
+  "綜合系列": { price: 110, items: ["相思果","洛神花","小紅莓","蒟蒻干","情人果","無花果(木瓜絲)","辣豆干","沙茶豆干","化應子","大仙李","仙楂片","小丸子","梅粉","蒜香蠶豆"] }
 };
 
 function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
@@ -191,7 +182,12 @@ function buildForm() {
       const price = typeof entry === 'string' ? DATA[cat].price : entry.price;
       const row = document.createElement('div');
       row.className = 'item-row';
-      row.innerHTML = `
+      const soldOut = typeof entry !== 'string' && entry.soldOut;
+      row.innerHTML = soldOut ? `
+        <span class="name" style="color:#aaa;">${name}</span>
+        <span class="price" style="color:#c0392b; font-weight:bold;">缺貨中</span>
+        <input type="number" min="0" value="0" disabled style="background:#eee;" data-item="${name}" data-price="${price}" data-cat="${cat}">
+      ` : `
         <span class="name">${name}</span>
         <span class="price">$${price}</span>
         <input type="number" min="0" value="0" data-item="${name}" data-price="${price}" data-cat="${cat}">
