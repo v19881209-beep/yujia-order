@@ -103,6 +103,16 @@
     <p>同事訂購單 - 每包110元(部分除外)，滿2200元享免運宅配</p>
   </header>
 
+  <div class="list-section" style="margin-top:0; border-radius:0; border-top:none;">
+    <h2>🤔 上次訂了什麼？腦袋一片空白？</h2>
+    <p class="empty-note" style="margin:0 0 10px;">別緊張，連果乾都記得你，只是你自己忘了。輸入姓名按查詢，上次買的、買幾包通通幫你翻出來（不滿意還能取消）。</p>
+    <div style="display:flex; gap:8px;">
+      <input type="text" id="query-name" placeholder="輸入你訂購時填的姓名" onkeydown="if(event.key==='Enter')queryMyOrders()" style="flex:1; padding:14px 16px; border:1px solid #ccc; border-radius:8px; font-size:26px;">
+      <button onclick="queryMyOrders()" style="background:#8a4a2f; color:white; border:none; padding:14px 30px; border-radius:10px; font-size:24px; cursor:pointer; white-space:nowrap;">查詢</button>
+    </div>
+    <div id="query-result" style="margin-top:12px;"></div>
+  </div>
+
   <div class="info-box">
     <label>訂購人姓名</label>
     <input type="text" id="orderer-name" placeholder="請輸入姓名">
@@ -115,15 +125,6 @@
     <div id="msg" class="msg"></div>
   </div>
 
-  <div class="list-section">
-    <h2>查詢我的歷史訂單</h2>
-    <p class="empty-note" style="margin:0 0 10px;">輸入訂購人姓名，就能看到你以前訂過的內容，也可以在這裡取消。</p>
-    <div style="display:flex; gap:8px;">
-      <input type="text" id="query-name" placeholder="輸入你訂購時填的姓名" onkeydown="if(event.key==='Enter')queryMyOrders()" style="flex:1; padding:14px 16px; border:1px solid #ccc; border-radius:8px; font-size:26px;">
-      <button onclick="queryMyOrders()" style="background:#8a4a2f; color:white; border:none; padding:14px 30px; border-radius:10px; font-size:24px; cursor:pointer; white-space:nowrap;">查詢</button>
-    </div>
-    <div id="query-result" style="margin-top:12px;"></div>
-  </div>
 </div>
 
 <script>
