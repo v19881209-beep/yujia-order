@@ -104,8 +104,8 @@
   </header>
 
   <div id="closed-banner" style="display:none; background:#c0392b; color:white; padding:16px 24px; font-size:26px; font-weight:bold; line-height:1.5;">
-    🔒 本次訂購已於 12/5 截單，頁面已鎖定，無法再下單。<br>
-    <span style="font-size:22px; font-weight:normal;">還是可以在下面查詢自己的訂單。付款日期，等郁嘉做好心理準備再通知。</span>
+    🔒 本次訂購已於 12/5 截單，頁面已鎖定，無法再下單或取消。<br>
+    <span style="font-size:22px; font-weight:normal;">訂單可以在下面查詢，但不能再取消。付款日期，等郁嘉做好心理準備再通知。</span>
   </div>
 
   <div class="list-section intro" style="margin-top:0; border-radius:0; border-top:none; background:#fff8ec;">
@@ -128,7 +128,7 @@
 
   <div class="list-section" style="margin-top:0; border-radius:0; border-top:none;">
     <h2>🤔 上次訂了什麼？腦袋一片空白？</h2>
-    <p class="empty-note" style="margin:0 0 10px;">別緊張，連果乾都記得你，只是你自己忘了。在上面填好姓名，按下面的按鈕，上次買的、買幾包通通幫你翻出來（不滿意還能取消）。</p>
+    <p class="empty-note" style="margin:0 0 10px;">別緊張，連果乾都記得你，只是你自己忘了。在上面填好姓名，按下面的按鈕，上次買的、買幾包通通幫你翻出來（截單前不滿意還能取消）。</p>
     <button onclick="queryMyOrders()" style="background:#8a4a2f; color:white; border:none; padding:14px 30px; width:100%; border-radius:10px; font-size:24px; cursor:pointer; white-space:nowrap;">查詢我的歷史訂單</button>
     <div id="query-result" style="margin-top:12px;"></div>
   </div>
@@ -292,7 +292,7 @@ async function queryMyOrders() {
         ${(o.date||o.time||o.timestamp) ? `<div style="color:#888; font-size:21px; margin-bottom:4px;">${esc(fmtDate(o.date||o.time||o.timestamp))}</div>` : ''}${o.paid ? `<div style="color:#c0392b; font-weight:bold; font-size:21px;">${o.paidDate ? esc(o.paidDate)+' ' : ''}已付款</div>` : ''}
         <div style="font-size:24px;">${itemsText}</div>
         <div style="color:#888; font-size:21px; margin-top:4px;">小計 $${total}</div>
-        <button onclick="cancelMyOrder('${o.orderId}', '${safeName}')" style="margin-top:8px; background:#c0392b; color:white; border:none; padding:12px 24px; border-radius:8px; font-size:21px; cursor:pointer;">取消此筆訂單</button>
+        ${orderClosed ? '<div style="margin-top:8px; color:#888; font-size:21px;">🔒 已截單，無法取消</div>' : `<button onclick="cancelMyOrder('${o.orderId}', '${safeName}')" style="margin-top:8px; background:#c0392b; color:white; border:none; padding:12px 24px; border-radius:8px; font-size:21px; cursor:pointer;">取消此筆訂單</button>`}
       </div>`;
     });
     resultEl.innerHTML = html;
@@ -302,6 +302,8 @@ async function queryMyOrders() {
 }
 
 async function cancelMyOrder(orderId, name) {
+  applyLock();
+  if (orderClosed) { alert('已截單，無法再取消。有問題請直接找郁嘉。'); queryMyOrders(); return; }
   if (!confirm('確定要取消這筆訂單嗎？此動作無法復原。')) return;
   try {
     const res = await fetch(WEBAPP_URL, {
